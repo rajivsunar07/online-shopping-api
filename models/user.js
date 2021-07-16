@@ -13,6 +13,10 @@ const userSchema = new mongoose.Schema({
     is_admin: {
         type: Boolean,
         default: false
+    },
+    type: {
+        type: String,
+        enum: ['admin', 'customer']
     }
 })
 
