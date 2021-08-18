@@ -42,4 +42,4 @@ router.delete('/comment/delete', auth.verifyUser, function(req, res){
     })
 })
 
-module.exports = router
+module.exports = router 
