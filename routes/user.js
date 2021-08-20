@@ -10,27 +10,29 @@ const UserController = require('../controllers/user')
 
 router.post('/register', UserController.register)
 
+router.post('/login', UserController.login)
+
 //-- login --
-router.post('/user/login', function(req,res){
-    const username = req.body.username
-    const password = req.body.password
+// router.post('/user/login', function(req,res){
+//     const username = req.body.username
+//     const password = req.body.password
 
-    User.findOne({username: username})
-    .then(function(userData){
-        if(userData == null){
-            return res.status(403).json({message: 'invalid'})
-        }
+//     User.findOne({username: username})
+//     .then(function(userData){
+//         if(userData == null){
+//             return res.status(403).json({message: 'invalid'})
+//         }
         
-        bcrypt.compare(password.userData.password, function(err, result){
-            if(result==false){
-                return res.status(403).json({message: "invalid credentials"})
-            }
+//         bcrypt.compare(password.userData.password, function(err, result){
+//             if(result==false){
+//                 return res.status(403).json({message: "invalid credentials"})
+//             }
 
-            const token = jwt.sign({YourId: data._id}, "anysecretkey")
-            res.status(200).json({token11: token, message: "Auth Success"})
-        })
-    })
-})
+//             const token = jwt.sign({YourId: data._id}, "anysecretkey")
+//             res.status(200).json({token11: token, message: "Auth Success"})
+//         })
+//     })
+// })
 
 router.post('/profile/upload', upload.single('myImage'), function(req,res){
     if(req.file == undefined){
