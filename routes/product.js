@@ -7,6 +7,13 @@ const router = new express.Router()
 const auth = require('../middleware/auth')
 const upload = require('../middleware/fileUpload')
 
+const {get_all, create} = require('../controllers/product')
+
+router
+.route('/')
+.get(get_all)
+.post(create)
+
 router.get('/product/detail/:id', function(req, res){
     var id = res.send(req.params.id)
 

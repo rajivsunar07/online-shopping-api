@@ -31,6 +31,6 @@ app.use((req, res, next) => {
   });
 
 app.use('/user', userRoute)
-app.use(productRoute)
+app.use('/product', productRoute)
 
-app.listen(3000)
+app.listen(process.env.PORT || 3000)
