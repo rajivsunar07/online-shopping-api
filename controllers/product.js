@@ -36,7 +36,6 @@ exports.get_one = (req, res) => {
 }
 
 exports.create = (req, res) => {
-    console.log(req.userdata._id)
     const product = new Product({
         _id: mongoose.Types.ObjectId(),
         name: req.body.name,
@@ -50,12 +49,21 @@ exports.create = (req, res) => {
     .then(result=>{
         res.status(200).json({
             success: true,
-            message: "Product created successfully"
+            message: "Product created successfully",
+            createdProduct: {
+                name: result.name,
+                price: result.price,
+                request: {
+                  type: "GET",
+                  url: "http://localhost:5000/products/" + result._id
+                }
+              }
         })
     })
     .catch(err => {
         res.status(500).json({
-            error: err
+            error: err,
+            message: "Error in product cretion"
         })
     })
 }
