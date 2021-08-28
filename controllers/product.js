@@ -15,15 +15,34 @@ exports.get_all = (req, res) => {
             result: result
         })
     })
+    .catch(error => {
+        res.status(500).json({
+            error: err
+        })
+    })
+}
+
+exports.get_one = (req, res) => {
+    Product.find({ _id: req.params.id })
+    .exec()
+    .then(result=>{
+        if(result){
+            res.status(200).json({
+                success: true,
+            })
+        }
+    })
     .catch()
 }
 
 exports.create = (req, res) => {
+    console.log(req.userdata._id)
     const product = new Product({
         _id: mongoose.Types.ObjectId(),
         name: req.body.name,
         price: req.body.price,
-        description: req.body.description
+        description: req.body.description,
+        user: req.userdata._id
     })
 
     product
@@ -40,3 +59,4 @@ exports.create = (req, res) => {
         })
     })
 }
+

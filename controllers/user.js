@@ -35,12 +35,14 @@ exports.register = (req, res) => {
                         user
                         .save()
                         .then(result => {
+                            // if user succesfully saved
                             res.status(201).json({
                                 success: true,
                                 message: "User created succesfully"
                             })
                         })
                         .catch(err => {
+                            // if an error occures
                             console.log(err)
                             res.status(500).json({
                                 error: err
@@ -81,6 +83,7 @@ exports.login = (req, res) => {
                     }
                 )
                 return res.status(200).json({
+                    success: true,
                     message: "Authentication successful",
                     token: token
                 })

@@ -8,11 +8,12 @@ const auth = require('../middleware/auth')
 const upload = require('../middleware/fileUpload')
 
 const {get_all, create} = require('../controllers/product')
+const {verifyUser} = require('../middleware/auth')
 
 router
 .route('/')
 .get(get_all)
-.post(create)
+.post(verifyUser, create)
 
 router.get('/product/detail/:id', function(req, res){
     var id = res.send(req.params.id)
