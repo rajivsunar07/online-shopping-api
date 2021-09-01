@@ -12,7 +12,16 @@ exports.get_all = (req, res) => {
     .then(result => {
         res.status(200).json({
             success: true,
-            result: result
+            result: result.map(product => {
+                return {
+                    productId : product._id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image,
+                    description: product.description,
+                    user: product.user
+                }
+            })
         })
     })
     .catch(error => {
@@ -29,19 +38,31 @@ exports.get_one = (req, res) => {
         if(result){
             res.status(200).json({
                 success: true,
+                result: result
+            })
+        }else{
+            res.status(401).json({
+                success: false,
+                message: "Product not found"
             })
         }
     })
-    .catch()
+    .catch(err => {
+        res.status(500).json({
+            error: err
+        })
+    })
 }
 
 exports.create = (req, res) => {
+
     const product = new Product({
         _id: mongoose.Types.ObjectId(),
         name: req.body.name,
         price: req.body.price,
         description: req.body.description,
-        user: req.userdata._id
+        // user: req.userdata._id,
+        image: req.file.path
     })
 
     product
@@ -63,8 +84,25 @@ exports.create = (req, res) => {
     .catch(err => {
         res.status(500).json({
             error: err,
-            message: "Error in product cretion"
+            message: "Error in product creation"
         })
     })
 }
 
+exports.update = (req, res, next) => {
+    const id = req.params.id;
+
+    
+    Product.findByIdAndUpdate(id, req.body)
+      .exec()
+      .then(result => {
+        res.status(200).json({
+          message: "Product updated"
+        });
+      })
+      .catch(err => {
+        res.status(500).json({
+          error: err
+        });
+      });
+  };
