@@ -90,8 +90,8 @@ exports.create = (req, res) => {
 }
 
 exports.update = (req, res, next) => {
-    const id = req.params.id;
 
+    const id = req.params.id;
     
     Product.findByIdAndUpdate(id, req.body)
       .exec()
@@ -106,3 +106,20 @@ exports.update = (req, res, next) => {
         });
       });
   };
+
+exports.delete_product = (req, res, next) => {
+    const id = req.params.id;
+
+    Product.findByIdAndDelete(id)
+        .exec()
+        .then(result => {
+            res.status(200).json({
+                message: "Product deleted"
+            });
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            });
+        });
+};
