@@ -56,13 +56,17 @@ exports.get_one = (req, res) => {
 
 exports.create = (req, res) => {
 
+    
+
     const product = new Product({
         _id: mongoose.Types.ObjectId(),
         name: req.body.name,
         price: req.body.price,
         description: req.body.description,
         // user: req.userdata._id,
-        image: req.file.path
+        image: req.files.map(file => {
+                return file.path
+            })
     })
 
     product
