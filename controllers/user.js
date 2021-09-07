@@ -100,3 +100,28 @@ exports.login = (req, res) => {
         })
     })
 }
+
+exports.get_user = (req, res, next) => {
+
+    try{
+        const token = req.headers.authorization.split(" ")[1] // bearer token
+        const data = jwt.verify(token, process.env.JWT_SECRET_KEY)
+
+        User.findOne({_id: data.userId})
+        .then(result => {
+            res.status(200).json({
+                user: result
+            })
+            next()
+        })
+        .catch(err => {
+            res.status(401).json({error: err})
+        })
+    }
+    catch(err){
+        res.status(401).json({
+            error: err,
+            message: "User not found"
+        })
+    }
+}
