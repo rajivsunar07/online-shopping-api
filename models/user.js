@@ -10,13 +10,9 @@ const userSchema = new mongoose.Schema({
     address: {type: String},
     phone: {type: String},
     password: {type: String},
+    image: {type: String},
     is_admin: {
-        type: Boolean,
-        default: false
-    },
-    type: {
-        type: String,
-        enum: ['admin', 'customer']
+        type: Boolean
     }
 })
 
