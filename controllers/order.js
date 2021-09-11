@@ -8,22 +8,22 @@ const OrderItem = require("../models/orderItem")
 const Product = require("../models/product")
 
 exports.create =  (req, res, next) => {
+
     const orderItem = new OrderItem({
         _id: mongoose.Types.ObjectId(),
         product: req.body.product,
         quantity: req.body.quantity,
-        price: () => { 
-            Product.findById(req.body.product)
-            .then(result => {
-                return result.price * parseInt(req.body.quantity)
-            })
-        },
+        price: req.body.price,
         seller: req.body.seller
     })
 
     orderItem.save()
-    .then()
-    .catch()
+    .then(result => {
+        console.log('order item created')
+    })
+    .catch(err => {
+        console.log('error creating order item')
+    })
 
     const order = new Order({
         _id: mongoose.Types.ObjectId(),
@@ -51,7 +51,7 @@ exports.create =  (req, res, next) => {
 exports.get_for_user =  (req, res, next) => {
 
     Order.find({ user: req.userdata._id, ordered: false }).sort({ created_at: -1 }).limit(1)
-    .exec()
+    .populate('item')
     .then(result => {
         res.status(200).json({
             success: true,
@@ -65,6 +65,8 @@ exports.get_for_user =  (req, res, next) => {
         })
     })
 }
+
+
 
 exports.delete_order = (req, res, next) => {
 
