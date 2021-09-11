@@ -66,6 +66,52 @@ exports.get_for_user = (req, res, next) => {
         })
 }
 
+exports.add_order_item = (req, res, next) =>{
+    const orderItem = new OrderItem({
+        _id: mongoose.Types.ObjectId(),
+        product: req.body.product,
+        quantity: req.body.quantity,
+        price: req.body.price,
+        seller: req.body.seller
+    })
+
+    orderItem.save()
+    .then(r => {
+        Order.find({ user: req.userdata._id, ordered: false }).sort({ created_at: -1 }).limit(1)
+        .then(result => {
+            Order.updateOne({ _id: result[0]._id}, { $addToSet : { item: orderItem}})
+            .exec()
+            .then(rslt => {
+                res.status(200).json({
+                    success: true,
+                    message: "Order item added to the order"
+                })
+            })
+            .catch(err => {
+                res.status(500).json({
+                    error: err,
+                    message: "Order item not added to the order"
+                })
+            })
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err,
+                message: "Order not found"
+            })
+        })
+    })
+    .catch(err => {
+        res.status(500).json({
+            error: err,
+            message: "Failed to save order item"
+        })
+    })
+
+    
+    
+}
+
 exports.update_order_item = (req, res, next) => {
     OrderItem.findByIdAndUpdate(req.params.itemId, req.body)
         .then(result => {
