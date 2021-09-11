@@ -66,7 +66,21 @@ exports.get_for_user =  (req, res, next) => {
     })
 }
 
-
+exports.update_order_item = (req, res, next) => {
+    OrderItem.findByIdAndUpdate(req.params.itemId, req.body)
+    .then(result => {
+        res.status(200).json({
+            success: true,
+            message: "Order item updated successfully"
+        })
+    })
+    .catch(err => {
+        res.status(500).json({
+            error: err,
+            message: "Error in updating order item"
+        })
+    })
+}
 
 exports.delete_order = (req, res, next) => {
 
