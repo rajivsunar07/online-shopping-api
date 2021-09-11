@@ -7,7 +7,7 @@ const Order = require("../models/order")
 const OrderItem = require("../models/orderItem")
 const Product = require("../models/product")
 
-exports.create =  (req, res, next) => {
+exports.create = (req, res, next) => {
 
     const orderItem = new OrderItem({
         _id: mongoose.Types.ObjectId(),
@@ -18,12 +18,12 @@ exports.create =  (req, res, next) => {
     })
 
     orderItem.save()
-    .then(result => {
-        console.log('order item created')
-    })
-    .catch(err => {
-        console.log('error creating order item')
-    })
+        .then(result => {
+            console.log('order item created')
+        })
+        .catch(err => {
+            console.log('error creating order item')
+        })
 
     const order = new Order({
         _id: mongoose.Types.ObjectId(),
@@ -34,68 +34,93 @@ exports.create =  (req, res, next) => {
     })
 
     order.save()
-    .then(result => {
-        res.status(200).json({
-            success: true,
-            message: "Order created succesfully"
+        .then(result => {
+            res.status(200).json({
+                success: true,
+                message: "Order created succesfully"
+            })
         })
-    })
-    .catch(err => {
-        res.status(500).json({
-            message: "Order creation failed",
-            error: err
+        .catch(err => {
+            res.status(500).json({
+                message: "Order creation failed",
+                error: err
+            })
         })
-    })
 }
 
-exports.get_for_user =  (req, res, next) => {
+exports.get_for_user = (req, res, next) => {
 
     Order.find({ user: req.userdata._id, ordered: false }).sort({ created_at: -1 }).limit(1)
-    .populate('item')
-    .then(result => {
-        res.status(200).json({
-            success: true,
-            result: result
+        .populate('item')
+        .then(result => {
+            res.status(200).json({
+                success: true,
+                result: result
+            })
         })
-    })
-    .catch(err => {
-        res.status(500).json({
-            message: "Error retreiving order",
-            error: err
+        .catch(err => {
+            res.status(500).json({
+                message: "Error retreiving order",
+                error: err
+            })
         })
-    })
 }
 
 exports.update_order_item = (req, res, next) => {
     OrderItem.findByIdAndUpdate(req.params.itemId, req.body)
-    .then(result => {
-        res.status(200).json({
-            success: true,
-            message: "Order item updated successfully"
+        .then(result => {
+            res.status(200).json({
+                success: true,
+                message: "Order item updated successfully"
+            })
         })
-    })
-    .catch(err => {
-        res.status(500).json({
-            error: err,
-            message: "Error in updating order item"
+        .catch(err => {
+            res.status(500).json({
+                error: err,
+                message: "Error in updating order item"
+            })
         })
-    })
+}
+
+exports.delete_order_item = (req, res, next) => {
+    OrderItem.findByIdAndDelete(req.params.itemId)
+        .then(result => {
+            // console.log(result)
+            Order.findOneAndUpdate({ item: result._id }, { $pull: { item:  { _id: result._id }}}, { safe: true })
+            .then(r => {
+                res.status(200).json({
+                    message: "Order item deleted and removed successfully"
+                })
+            })
+            .catch(err =>{
+                res.status(500).json({
+                    error: err,
+                    message: "Error in removing item form the order"
+                })
+            })
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err,
+                message: "Error in deleteing item"
+            })
+        })
 }
 
 exports.delete_order = (req, res, next) => {
 
     Order.deleteOne({ _id: req.params.id })
-    .exec()
-    .then(result => {
-        res.status(200).json({
-            success: true,
-            message: "Order deleted successfully"
+        .exec()
+        .then(result => {
+            res.status(200).json({
+                success: true,
+                message: "Order deleted successfully"
+            })
         })
-    })
-    .catch(err => {
-        res.status(500).json({
-            message: "Error in order deletion",
-            error: err
+        .catch(err => {
+            res.status(500).json({
+                message: "Error in order deletion",
+                error: err
+            })
         })
-    })
 }
