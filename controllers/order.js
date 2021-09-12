@@ -79,7 +79,7 @@ exports.add_order_item = (req, res, next) =>{
     .then(r => {
         Order.find({ user: req.userdata._id, ordered: false }).sort({ created_at: -1 }).limit(1)
         .then(result => {
-            Order.updateOne({ _id: result[0]._id}, { $addToSet : { item: orderItem}})
+            Order.findOneAndUpdate({ _id: result[0]._id}, { total_price: String(parseInt(result[0].total_price) + parseInt(req.body.price)) }, { $addToSet : { item: orderItem}})
             .exec()
             .then(rslt => {
                 res.status(200).json({
@@ -106,10 +106,7 @@ exports.add_order_item = (req, res, next) =>{
             error: err,
             message: "Failed to save order item"
         })
-    })
-
-    
-    
+    }) 
 }
 
 exports.update_order_item = (req, res, next) => {
