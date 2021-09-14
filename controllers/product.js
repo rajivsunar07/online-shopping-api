@@ -5,6 +5,7 @@ const dotenv = require("dotenv")
 
 const User = require("../models/user")
 const Product = require("../models/product")
+const fs = require('fs')
 
 exports.get_all = (req, res) => {
     Product.find()
@@ -12,16 +13,7 @@ exports.get_all = (req, res) => {
     .then(result => {
         res.status(200).json({
             success: true,
-            result: result.map(product => {
-                return {
-                    productId : product._id,
-                    name: product.name,
-                    price: product.price,
-                    image: product.image,
-                    description: product.description,
-                    user: product.user
-                }
-            })
+            result: result
         })
     })
     .catch(error => {
@@ -56,14 +48,13 @@ exports.get_one = (req, res) => {
 
 exports.create = (req, res) => {
 
-    
 
     const product = new Product({
         _id: mongoose.Types.ObjectId(),
         name: req.body.name,
         price: req.body.price,
         description: req.body.description,
-        // user: req.userdata._id,
+        user: req.userdata._id,
         image: req.files.map(file => {
                 return file.path
             })
@@ -117,6 +108,12 @@ exports.delete_product = (req, res, next) => {
     Product.findByIdAndDelete(id)
         .exec()
         .then(result => {
+
+            // delete images from files
+            for(i in result.image){
+               fs.unlinkSync(result.image[i])
+            }
+
             res.status(200).json({
                 message: "Product deleted"
             });
