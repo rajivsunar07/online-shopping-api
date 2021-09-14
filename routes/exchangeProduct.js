@@ -8,4 +8,6 @@ const router = new express.Router()
 
 router
 .route('/')
+.get(verifyUser, get_requests)
 .post(verifyUser, upload.array('image', 12), create)
+

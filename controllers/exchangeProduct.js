@@ -8,6 +8,7 @@ exports.create = (req, res) => {
         description: req.body.description,
         user: req.userdata._id,
         exchangeFor:  req.body.exchangeFor,
+        seller:  req.body.seller,
         image: req.files.map(file => {
                 return file.path
             })
@@ -29,3 +30,25 @@ exports.create = (req, res) => {
         })
     })
 }
+
+// for sellers
+exports.get_requests = (req, res, next) => {
+
+    ExchangeProduct.find({ user: req.userdata._id})
+        .populate('exchangeFor', '_id name image')
+        .then(result => {
+            res.status(200).json({
+                success: true,
+                result: result
+            })
+        })
+        .catch(err => {
+            res.status(500).json({
+                message: "Error retreiving order",
+                error: err
+            })
+        })
+}
+
+
+
