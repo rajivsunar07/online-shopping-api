@@ -51,7 +51,29 @@ exports.create = (req, res, next) => {
 exports.get_for_user = (req, res, next) => {
 
     Order.find({ user: req.userdata._id, ordered: false }).sort({ created_at: -1 }).limit(1)
-        .populate('item')
+        .populate({path: 'item',
+            populate: [{path: 'product', select: 'name image'}, {path: 'seller', select: 'name'}],
+        })
+        .then(result => {
+            res.status(200).json({
+                success: true,
+                result: result
+            })
+        })
+        .catch(err => {
+            res.status(500).json({
+                message: "Error retreiving order",
+                error: err
+            })
+        })
+}
+
+exports.get_all_for_user = (req, res, next) => {
+
+    Order.find({ user: req.userdata._id, ordered: true })
+        .populate({path: 'item',
+            populate: [{path: 'product', select: 'name image'}, {path: 'seller', select: 'name'}],
+        })
         .then(result => {
             res.status(200).json({
                 success: true,
@@ -192,6 +214,22 @@ exports.delete_order_item = (req, res, next) => {
                 message: "Error in deleteing item"
             })
         })
+}
+
+exports.update_order = (req, res, next) =>{
+    Order.findByIdAndUpdate(req.params.id, req.body)
+    .then(result => {
+        res.status(200).json({
+            success: true,
+            message: "Order updated successfully"
+        })
+    })
+    .catch(err => {
+        res.status(500).json({
+            message: "Error in order update",
+            error: err
+        })
+    })
 }
 
 exports.delete_order = (req, res, next) => {
