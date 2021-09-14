@@ -17,6 +17,10 @@ const orderItemSchema = mongoose.Schema({
     seller: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
+    },
+    exchangeFor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'ExchangeProduct'
     }
 },
     {

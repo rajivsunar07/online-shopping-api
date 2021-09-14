@@ -21,6 +21,11 @@ const orderSchema = mongoose.Schema({
         required: true,
         default: ''
     },
+    ordered: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
     completed: {
         type: Boolean,
         required: true,
