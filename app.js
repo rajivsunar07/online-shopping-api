@@ -11,9 +11,15 @@ require('./db/db_connection')
 
 const userRoute = require('./routes/user')
 const productRoute = require('./routes/product')
+const orderRoute = require('./routes/order')
+const exchangeProductRoute = require('./routes/exchangeProduct')
+
+
+
 const app = express()
 
 app.use(morgan("dev"));
+app.use('/files', express.static('files'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -32,5 +38,9 @@ app.use((req, res, next) => {
 
 app.use('/user', userRoute)
 app.use('/product', productRoute)
+app.use('/order', orderRoute)
+app.use('/exchangeProduct', orderRoute)
+
+
 
 app.listen(process.env.PORT || 5000)
