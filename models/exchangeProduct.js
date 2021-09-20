@@ -20,7 +20,7 @@ const exchangeProductSchema = mongoose.Schema({
     },
     exchangeFor: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'product'
+        ref: 'Product'
     },
     seller: {
         type: mongoose.Schema.Types.ObjectId,

@@ -34,8 +34,8 @@ exports.create = (req, res) => {
 // for sellers
 exports.get_requests = (req, res, next) => {
 
-    ExchangeProduct.find({ user: req.userdata._id})
-        .populate('exchangeFor', '_id name image')
+    ExchangeProduct.find({ seller: req.userdata._id})
+        .populate('exchangeFor')
         .then(result => {
             res.status(200).json({
                 success: true,
@@ -44,11 +44,26 @@ exports.get_requests = (req, res, next) => {
         })
         .catch(err => {
             res.status(500).json({
-                message: "Error retreiving order",
+                message: "Error retreiving requests",
                 error: err
             })
         })
 }
 
+exports.update = (req, res, next) => {
+    ExchangeProduct.findByIdAndUpdate(req.params.id, req.body)
+    .then(result => {
+        res.status(200).json({
+            success: true,
+            message: "Exchange Product updated successfully"
+        })
+    })
+    .catch(err => {
+        res.status(500).json({
+            message: "Error updating Exchange Product",
+            error: err
+        })
+    })
+}
 
 
