@@ -136,3 +136,17 @@ exports.delete_product = (req, res, next) => {
         });
 };
 
+exports.get_for_user = (req, res, next) => {
+    Product.find({ user: req.userdata._id })
+        .then(result => {
+            res.status(200).json({
+                success: true,
+                result: result
+            })
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            });
+        })
+}
