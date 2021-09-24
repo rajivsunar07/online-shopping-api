@@ -21,6 +21,14 @@ const orderItemSchema = mongoose.Schema({
     exchangeFor: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'ExchangeProduct'
+    },
+    for: {
+        type: String,
+        default: 'sell',
+        enum: ['rent', 'exchange', 'sell']
+    },
+    rentedFor: {
+        type: Date
     }
 },
     {
