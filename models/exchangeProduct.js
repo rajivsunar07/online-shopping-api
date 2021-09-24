@@ -26,9 +26,10 @@ const exchangeProductSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
-    accepted: {
-        type: Boolean,
-        default: false
+    status: {
+        type: String,
+        default: 'pending',
+        enum: ['accepted', 'rejected', 'pending', 'added to cart']
     }
 },
     {
