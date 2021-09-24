@@ -7,6 +7,8 @@ const Order = require("../models/order")
 const OrderItem = require("../models/orderItem")
 const Product = require("../models/product")
 
+
+
 exports.create = (req, res, next) => {
 
     const orderItem = new OrderItem({
@@ -50,7 +52,7 @@ exports.create = (req, res, next) => {
 
 exports.get_for_user = (req, res, next) => {
 
-    Order.find({ user: req.userdata._id, ordered: false }).sort({ created_at: -1 }).limit(1)
+    Order.find({ user: req.userdata._id, status: 'unordered' }).sort({ created_at: -1 }).limit(1)
         .populate({path: 'item',
             populate: [{path: 'product', select: 'name image'}, {path: 'seller', select: 'name'}],
         })
@@ -70,7 +72,7 @@ exports.get_for_user = (req, res, next) => {
 
 exports.get_all_for_user = (req, res, next) => {
 
-    Order.find({ user: req.userdata._id, ordered: true })
+    Order.find({ user: req.userdata._id, status: 'ordered' })
         .populate({path: 'item',
             populate: [{path: 'product', select: 'name image'}, {path: 'seller', select: 'name'}],
         })
@@ -88,9 +90,41 @@ exports.get_all_for_user = (req, res, next) => {
         })
 }
 
+exports.get_for_seller = (req, res, next) => {
+    let orderitems = []
+
+    Order.find({ status: 'ordered' })
+    .populate({path: 'item',
+        populate: {path: 'product', select: 'name image'},
+    })  
+    .then(result => {
+        result.map(doc => {
+            doc.item.map(orderitem => {
+                if(String(orderitem.seller) == String(req.userdata._id)){
+                    console.log(orderitem.seller);
+                    orderitems.push(orderitem)
+                }
+            })
+        })
+
+        res.status(200).json({
+            success: true,
+            result: orderitems
+        })
+    })
+    .catch(err => {
+        res.status(500).json({
+            error: err,
+            message: "Error getting order items for seller"
+        })
+    })
+
+
+}
+
 exports.add_order_item = (req, res, next) => {
 
-    Order.find({ user: req.userdata._id, ordered: false }).sort({ created_at: -1 }).limit(1)
+    Order.find({ user: req.userdata._id, status: 'unordered' }).sort({ created_at: -1 }).limit(1)
         .populate('item')
         .then(result => {
             console.log(result[0]);
@@ -136,7 +170,7 @@ exports.add_order_item = (req, res, next) => {
 
                 orderItem.save()
                     .then(r => {
-                        Order.find({ user: req.userdata._id, ordered: false }).sort({ created_at: -1 }).limit(1)
+                        Order.find({ user: req.userdata._id, status: 'unordered'}).sort({ created_at: -1 }).limit(1)
                             .then(result => {
                                 Order.findByIdAndUpdate( result[0]._id , { $addToSet: { item: orderItem }, total_price: String(parseInt(result[0].total_price) + parseInt(req.body.price)) })
                                     .exec()
