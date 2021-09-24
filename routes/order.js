@@ -26,10 +26,6 @@ router
 .get(verifyUser, get_for_seller)
 
 router
-.route('/item')
-.post(verifyUser, add_order_item)
-
-router
 .route('/item/:itemId')
 .patch(verifyUser, update_order_item)
 .delete(verifyUser, delete_order_item)
