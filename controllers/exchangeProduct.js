@@ -31,10 +31,9 @@ exports.create = (req, res) => {
     })
 }
 
-// for sellers
 exports.get_requests = (req, res, next) => {
 
-    ExchangeProduct.find({ seller: req.userdata._id})
+    ExchangeProduct.find({ [req.params.for] : req.userdata._id})
         .populate('exchangeFor')
         .then(result => {
             res.status(200).json({
@@ -50,8 +49,9 @@ exports.get_requests = (req, res, next) => {
         })
 }
 
+
 exports.update = (req, res, next) => {
-    ExchangeProduct.findByIdAndUpdate(req.params.id, req.body)
+    ExchangeProduct.findByIdAndUpdate(req.params.id, {accepted: req.body.accepted})
     .then(result => {
         res.status(200).json({
             success: true,
@@ -66,4 +66,26 @@ exports.update = (req, res, next) => {
     })
 }
 
+exports.delete_exchangeProduct = (req, res, next) => {
+
+    ExchangeProduct.findByIdAndDelete(req.params.id)
+        .exec()
+        .then(result => {
+
+            // delete images from files
+            for (i in result.image) {
+                fs.unlinkSync(result.image[i])
+            }
+
+            res.status(200).json({
+                message: "Exchange product deleted"
+            });
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err,
+
+            });
+        });
+}
 

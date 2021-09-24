@@ -10,8 +10,15 @@ const router = new express.Router()
 
 router
 .route('/')
-.get(verifyUser, get_requests)
 .post(verifyUser, upload.array('image', 12), create)
+
+router
+.route('/:for')
+.get(verifyUser, get_requests)
+
+
+router
+.route('/:id')
 .patch(verifyUser, update)
 
 module.exports = router
