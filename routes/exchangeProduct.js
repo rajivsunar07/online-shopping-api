@@ -20,5 +20,7 @@ router
 router
 .route('/:id')
 .patch(verifyUser, update)
+.delete(verifyUser, delete_exchangeProduct)
+
 
 module.exports = router
