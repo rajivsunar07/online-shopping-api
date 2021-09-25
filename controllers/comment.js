@@ -15,3 +15,9 @@ exports.create = (req, res, next) => {
     .then(res => success_message(res, "Comment created successfully"))
     .catch(err => error_message(res, err, "Comment creation failed"))
 }
+
+exports.get_all = (req, res, next) => {
+    Comment.find({ product: req.params.product })
+    .then(res => success_result(res, result))
+    .catch(err => error_message(res, err, "Error getting comment for product"))
+}
