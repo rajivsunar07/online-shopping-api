@@ -19,9 +19,9 @@ exports.create_order_item = async (req) => {
         _id: mongoose.Types.ObjectId()
     })
 
-    for(i in req.body){
+    for (i in req.body) {
         orderItem[i] = req.body[i]
-    }  
+    }
 
     await orderItem.save()
 
@@ -60,32 +60,32 @@ exports.create = async (req, res, next) => {
         let current_item = {}
 
         // check if product already in the order
-        for(i in user_order[0].item){
-            if(user_order[0].item[i].product._id == req.body.product && user_order[0].item[i].for == 'sell') {
+        for (i in user_order[0].item) {
+            if (user_order[0].item[i].product._id == req.body.product && user_order[0].item[i].for == 'sell') {
 
                 current_item = user_order[0].item[i]
                 exists = true
-                
-                OrderItem.findByIdAndUpdate(current_item._id, 
-                    { 
-                        price: parseInt(current_item.price / current_item.quantity) + parseInt(current_item.price), 
-                        quantity: parseInt(current_item.quantity) + 1 
+
+                OrderItem.findByIdAndUpdate(current_item._id,
+                    {
+                        price: parseInt(current_item.price / current_item.quantity) + parseInt(current_item.price),
+                        quantity: parseInt(current_item.quantity) + 1
                     })
                     .exec()
-                break   
+                break
             }
         }
 
-        if(!exists){ current_item = await this.create_order_item(req) }
+        if (!exists) { current_item = await this.create_order_item(req) }
 
-        Order.findByIdAndUpdate(user_order[0]._id, 
-            {total_price: parseInt(user_order[0].total_price) + parseInt(current_item.price / current_item.quantity), $addToSet : { item: current_item._id } },
-            )
-        .then(result => this.success_message(res, 'Item added succesfully to the order') )
-        .catch(err => this.error_message(res, err, 'Error in adding item to the order'))
+        Order.findByIdAndUpdate(user_order[0]._id,
+            { total_price: parseInt(user_order[0].total_price) + parseInt(current_item.price / current_item.quantity), $addToSet: { item: current_item._id } },
+        )
+            .then(result => this.success_message(res, 'Item added succesfully to the order'))
+            .catch(err => this.error_message(res, err, 'Error in adding item to the order'))
 
 
-    }else{
+    } else {
         const orderItem = await this.create_order_item(req)
 
         const order = new Order({
@@ -96,8 +96,8 @@ exports.create = async (req, res, next) => {
         })
 
         order.save()
-        .then(result => this.success_message(res, "Order created succesfully"))
-        .catch(err => this.error_message(res, err, "Order creation failed"))
+            .then(result => this.success_message(res, "Order created succesfully"))
+            .catch(err => this.error_message(res, err, "Order creation failed"))
     }
 
 }
@@ -105,8 +105,9 @@ exports.create = async (req, res, next) => {
 exports.get_for_user = (req, res, next) => {
 
     Order.find({ user: req.userdata._id, status: 'unordered' }).sort({ created_at: -1 }).limit(1)
-        .populate({path: 'item',
-            populate: [{path: 'product', select: 'name image'}, {path: 'seller', select: 'name'}],
+        .populate({
+            path: 'item',
+            populate: [{ path: 'product', select: 'name image' }, { path: 'seller', select: 'name' }],
         })
         .then(result => {
             res.status(200).json({
@@ -125,8 +126,9 @@ exports.get_for_user = (req, res, next) => {
 exports.get_all_for_user = (req, res, next) => {
 
     Order.find({ user: req.userdata._id, status: 'ordered' })
-        .populate({path: 'item',
-            populate: [{path: 'product', select: 'name image'}, {path: 'seller', select: 'name'}],
+        .populate({
+            path: 'item',
+            populate: [{ path: 'product', select: 'name image' }, { path: 'seller', select: 'name' }],
         })
         .then(result => {
             res.status(200).json({
@@ -142,34 +144,45 @@ exports.get_all_for_user = (req, res, next) => {
         })
 }
 
+exports.get_all_admin = (req, res, next) => {
+    Order.find({ status: { $in: ['ordered', 'completed'] } })
+        .populate({
+            path: 'item',
+            populate: [{ path: 'product', select: 'name image' }, { path: 'seller', select: 'name' }]
+        })
+        .then(result => this.success_result(res, result))
+        .catch(err => this.error_message(res, err, "Error getting orders"))
+}
+
 exports.get_for_seller = (req, res, next) => {
     let orderitems = []
 
     Order.find({ status: 'ordered' })
-    .populate({path: 'item',
-        populate: {path: 'product', select: 'name image'},
-    })  
-    .then(result => {
-        result.map(doc => {
-            doc.item.map(orderitem => {
-                if(String(orderitem.seller) == String(req.userdata._id)){
-                    console.log(orderitem.seller);
-                    orderitems.push(orderitem)
-                }
+        .populate({
+            path: 'item',
+            populate: { path: 'product', select: 'name image' },
+        })
+        .then(result => {
+            result.map(doc => {
+                doc.item.map(orderitem => {
+                    if (String(orderitem.seller) == String(req.userdata._id)) {
+                        console.log(orderitem.seller);
+                        orderitems.push(orderitem)
+                    }
+                })
+            })
+
+            res.status(200).json({
+                success: true,
+                result: orderitems
             })
         })
-
-        res.status(200).json({
-            success: true,
-            result: orderitems
+        .catch(err => {
+            res.status(500).json({
+                error: err,
+                message: "Error getting order items for seller"
+            })
         })
-    })
-    .catch(err => {
-        res.status(500).json({
-            error: err,
-            message: "Error getting order items for seller"
-        })
-    })
 
 
 }
@@ -217,20 +230,20 @@ exports.delete_order_item = (req, res, next) => {
         })
 }
 
-exports.update_order = (req, res, next) =>{
+exports.update_order = (req, res, next) => {
     Order.findByIdAndUpdate(req.params.id, req.body)
-    .then(result => {
-        res.status(200).json({
-            success: true,
-            message: "Order updated successfully"
+        .then(result => {
+            res.status(200).json({
+                success: true,
+                message: "Order updated successfully"
+            })
         })
-    })
-    .catch(err => {
-        res.status(500).json({
-            message: "Error in order update",
-            error: err
+        .catch(err => {
+            res.status(500).json({
+                message: "Error in order update",
+                error: err
+            })
         })
-    })
 }
 
 exports.delete_order = (req, res, next) => {
