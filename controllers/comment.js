@@ -23,14 +23,14 @@ exports.get_all = (req, res, next) => {
     .catch(err => error_message(res, err, "Error getting comment for product"))
 }
 
-exports.udpate = (req, res, next) => {
+exports.update = (req, res, next) => {
     Comment.findByIdAndUpdate(req.params.id, req.body)
     .then(result => success_message(res, "Comment updated succesfully"))
     .catch(err => error_message(res, err, "Error in updating comment"))
 }
 
-exports.delete = (req, res, next) => {
-    Comment.findByIdAndDelete(res.params.id)
+exports.delete_comment = (req, res, next) => {
+    Comment.findByIdAndDelete(req.params.id)
     .then(result => success_message(res, "Comment deleted succesfully"))
     .catch(err => error_message(res, err, "Error in deleting comment"))
 }
