@@ -14,6 +14,7 @@ const productRoute = require('./routes/product')
 const orderRoute = require('./routes/order')
 const exchangeProductRoute = require('./routes/exchangeProduct')
 const commentRoute = require('./routes/comment')
+const categoryRoute = require('./routes/category')
 
 
 
@@ -42,6 +43,8 @@ app.use('/product', productRoute)
 app.use('/order', orderRoute)
 app.use('/exchangeProduct', exchangeProductRoute)
 app.use('/comment', commentRoute)
+app.use('/category', categoryRoute)
+
 
 
 app.listen(process.env.PORT || 5000)
