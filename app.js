@@ -13,6 +13,7 @@ const userRoute = require('./routes/user')
 const productRoute = require('./routes/product')
 const orderRoute = require('./routes/order')
 const exchangeProductRoute = require('./routes/exchangeProduct')
+const commentRoute = require('./routes/comment')
 
 
 
@@ -39,8 +40,8 @@ app.use((req, res, next) => {
 app.use('/user', userRoute)
 app.use('/product', productRoute)
 app.use('/order', orderRoute)
-app.use('/exchangeProduct', orderRoute)
-
+app.use('/exchangeProduct', exchangeProductRoute)
+app.use('/comment', commentRoute)
 
 
 app.listen(process.env.PORT || 5000)
