@@ -4,7 +4,7 @@ const Comment = require("../models/comment")
 const { success_message, error_message, success_result } = require("./messages")
 
 exports.create = (req, res, next) => {
-    const comment = new Comment({
+    let comment = new Comment({
         _id: mongoose.Types.ObjectId(),
         user: req.userdata._id,
         product: req.body.product,
@@ -12,12 +12,19 @@ exports.create = (req, res, next) => {
     })
 
     comment.save()
-    .then(res => success_message(res, "Comment created successfully"))
+    .then(result => success_message(res, "Comment created successfully"))
     .catch(err => error_message(res, err, "Comment creation failed"))
 }
 
 exports.get_all = (req, res, next) => {
     Comment.find({ product: req.params.product })
-    .then(res => success_result(res, result))
+    .exec()
+    .then(result => success_result(res, result))
     .catch(err => error_message(res, err, "Error getting comment for product"))
+}
+
+exports.udpate = (req, res, next) => {
+    Comment.findByIdAndUpdate(req.params.product, req.body)
+    .then(result => success_message(res, "Comment updated succesfully"))
+    .catch(err => error_message(res, err, "Error in updating comment"))
 }
