@@ -2,8 +2,8 @@ const express = require('express')
 
 const { create, get_all_for_user, update_order, get_for_user,
      update_order_item, delete_order, delete_order_item, add_order_item,
-      get_for_seller } = require('../controllers/order')
-const { verifyUser } = require('../middleware/auth')
+      get_for_seller, get_all_admin } = require('../controllers/order')
+const { verifyUser, verifyAdmin } = require('../middleware/auth')
 
 const router = new express.Router()
 
@@ -15,6 +15,10 @@ router
 router
 .route('/user/all')
 .get(verifyUser, get_all_for_user)
+
+router
+.route('/admin')
+.get(verifyUser, verifyAdmin, get_all_admin)
 
 router
 .route('/:id')
