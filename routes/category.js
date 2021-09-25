@@ -9,7 +9,7 @@ router
 .route('/')
 .post(verifyUser, verifyAdmin, create)
 .patch(verifyUser, verifyAdmin, update)
-.get(verifyUser, verifyAdmin, get)
+.get(verifyUser, verifyAdmin, get_all)
 
 
 module.exports = router
