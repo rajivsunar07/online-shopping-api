@@ -18,11 +18,11 @@ const orderSchema = mongoose.Schema({
     },
     shipping_address: {
         type: String,
-        required: true,
         default: ''
     },
     status : {
         type: String,
+        default: 'unordered',
         required: true,
         enum : ['unordered', 'ordered', 'completed']
     }
