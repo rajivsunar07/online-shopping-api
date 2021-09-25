@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 
 const commentSchema = mongoose.Schema({
+    _id: mongoose.Schema.Types.ObjectId,
     product: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
@@ -9,8 +10,12 @@ const commentSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
-    description: {type: String},
-    // date: {type: Date} 
+    description: {
+        type: String,
+        required: true
+    },
+}, {
+    timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 })
 
 
