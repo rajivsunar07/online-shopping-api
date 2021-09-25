@@ -51,7 +51,7 @@ exports.get_requests = (req, res, next) => {
 
 
 exports.update = (req, res, next) => {
-    ExchangeProduct.findByIdAndUpdate(req.params.id, {accepted: req.body.accepted})
+    ExchangeProduct.findByIdAndUpdate(req.params.id, {status: req.body.status})
     .then(result => {
         res.status(200).json({
             success: true,
