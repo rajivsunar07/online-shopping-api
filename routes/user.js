@@ -3,32 +3,24 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
 const router = new express.Router()
-const auth = require('../middleware/auth')
+const { verifyUser } = require('../middleware/auth')
 const upload = require('../middleware/fileUpload')
 
-const UserController = require('../controllers/user')
+const { register, login, get_user, get_user_from_id, update, change_password } = require('../controllers/user')
 
-router.post('/register', UserController.register)
+router.post('/register', register)
+router.post('/login', login)
 
-router.post('/login', UserController.login)
+router.route('/')
+.get(verifyUser, get_user)
+.patch(verifyUser, upload.single('image'), update)
 
-router.post('/profile/upload', upload.single('myImage'), function(req,res){
-    if(req.file == undefined){
-        return res.status(400).json({message: 'only png allowed'})
-    }
-    
-    const data = new User({
-        profile_pic: req.file.filename
-    })
-    data.save()
-    .then(function(){
-        
-    })
-    .catch(function(){
-        
-    })
+router.route('/password')
+.patch(verifyUser, change_password)
+
+router.route('/:id')
+.get(get_user_from_id)
 
 
-})
 
 module.exports = router
