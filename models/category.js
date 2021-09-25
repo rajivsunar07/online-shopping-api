@@ -6,7 +6,7 @@ const categorySchema = mongoose.Schema({
         type: String
     },
     subCategory: {
-        type: [String]
+        type: [this]
     }
 }, {
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
