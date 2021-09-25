@@ -21,3 +21,9 @@ exports.update = (req, res, next) => {
     .catch(err => error_message(res, err, "Category update failed"))
 }
 
+
+exports.get_all = (req, res, next) => {
+    Category.find()
+    .then(result => success_result(res, result))
+    .catch(err => error_message(res, err, "Category get failed"))
+}
