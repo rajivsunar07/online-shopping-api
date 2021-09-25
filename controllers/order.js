@@ -7,6 +7,8 @@ const Order = require("../models/order")
 const OrderItem = require("../models/orderItem")
 const Product = require("../models/product")
 
+const { success_message, error_message, success_result } = require("./messages")
+
 exports.get_order_for_user = async (req) => {
     return await Order.find({ user: req.userdata._id, status: 'unordered' }).sort({ created_at: -1 }).limit(1).populate({
         path: 'item',
@@ -28,26 +30,6 @@ exports.create_order_item = async (req) => {
     return orderItem
 }
 
-exports.success_message = (res, message) => {
-    res.status(200).json({
-        success: true,
-        message: message
-    })
-}
-
-exports.success_result = (res, result) => {
-    res.status(200).json({
-        success: true,
-        result: result
-    })
-}
-
-exports.error_message = (res, err, message) => {
-    res.status(500).json({
-        error: err,
-        message: message
-    })
-}
 
 
 exports.create = async (req, res, next) => {
@@ -81,8 +63,8 @@ exports.create = async (req, res, next) => {
         Order.findByIdAndUpdate(user_order[0]._id,
             { total_price: parseInt(user_order[0].total_price) + parseInt(current_item.price / current_item.quantity), $addToSet: { item: current_item._id } },
         )
-            .then(result => this.success_message(res, 'Item added succesfully to the order'))
-            .catch(err => this.error_message(res, err, 'Error in adding item to the order'))
+            .then(result => success_message(res, 'Item added succesfully to the order'))
+            .catch(err => error_message(res, err, 'Error in adding item to the order'))
 
 
     } else {
@@ -96,8 +78,8 @@ exports.create = async (req, res, next) => {
         })
 
         order.save()
-            .then(result => this.success_message(res, "Order created succesfully"))
-            .catch(err => this.error_message(res, err, "Order creation failed"))
+            .then(result => success_message(res, "Order created succesfully"))
+            .catch(err => error_message(res, err, "Order creation failed"))
     }
 
 }
@@ -150,8 +132,8 @@ exports.get_all_admin = (req, res, next) => {
             path: 'item',
             populate: [{ path: 'product', select: 'name image' }, { path: 'seller', select: 'name' }]
         })
-        .then(result => this.success_result(res, result))
-        .catch(err => this.error_message(res, err, "Error getting orders"))
+        .then(result => success_result(res, result))
+        .catch(err => error_message(res, err, "Error getting orders"))
 }
 
 exports.get_for_seller = (req, res, next) => {
