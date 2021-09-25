@@ -1,6 +1,6 @@
 const express = require('express')
 
-const {create, get_requests, update } = require('../controllers/exchangeProduct')
+const {create, get_requests, update, delete_exchangeProduct } = require('../controllers/exchangeProduct')
 const {verifyUser} = require('../middleware/auth')
 const upload = require('../middleware/fileUpload')
 
