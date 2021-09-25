@@ -146,7 +146,58 @@ exports.update = (req, res, next) => {
       })
       .catch(err => {
         res.status(500).json({
-          error: err
+          error: err,
+          message: "Error in user update"
         });
       });
   };
+
+  exports.change_password = (req, res, next) => {
+    User.findById( req.userdata._id)
+    .exec()
+    .then(user => {
+        bcrypt.compare(req.body.password, user.password, (err, result) => {
+            if (err) {
+                return res.status(401).json({
+                    message: "Incorrect password"
+                })
+            }
+
+            if (result) {
+                bcrypt.hash(req.body.newPassword, 10, (err, hash) => {
+                    if (err) {
+                        return res.status(500).json({
+                            error: err
+                        })
+                    } else {
+
+                        User.findByIdAndUpdate( req.userdata._id, { password: hash} )
+                            .then(result => {
+                                return res.status(200).json({
+                                    success: true,
+                                    message: "Password changed successfully"
+                                })
+                            })
+                            .catch(err => {
+                                res.status(401).json({
+                                    error: err,
+                                    message: "Error in password change"
+                                })
+                            })
+
+                    }
+                })
+            }
+
+            res.status(401).json({
+                message: "Error in password update"
+            })
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
+        })
+    })
+  }
