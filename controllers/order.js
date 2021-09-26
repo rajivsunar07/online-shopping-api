@@ -12,7 +12,7 @@ const { success_message, error_message, success_result } = require("./messages")
 exports.get_order_for_user = async (req) => {
     return await Order.find({ user: req.userdata._id, status: 'unordered' }).sort({ created_at: -1 }).limit(1).populate({
         path: 'item',
-        populate: [{ path: 'product', select: 'name image' }, { path: 'seller', select: 'name' }],
+        populate: [{ path: 'product', select: 'price name image' }, { path: 'seller', select: 'name' }],
     })
 }
 
@@ -43,7 +43,7 @@ exports.create = async (req, res, next) => {
 
         // check if product already in the order
         for (i in user_order[0].item) {
-            if (user_order[0].item[i].product._id == req.body.product && user_order[0].item[i].for == 'sell') {
+            if (user_order[0].item[i].product._id == req.body.product && user_order[0].item[i].for == req.body.for) {
 
                 current_item = user_order[0].item[i]
                 exists = true
@@ -76,6 +76,7 @@ exports.create = async (req, res, next) => {
             total_price: parseInt(orderItem.price),
             user: req.userdata._id
         })
+        
 
         order.save()
             .then(result => success_message(res, "Order created succesfully"))
@@ -89,8 +90,9 @@ exports.get_for_user = (req, res, next) => {
     Order.find({ user: req.userdata._id, status: 'unordered' }).sort({ created_at: -1 }).limit(1)
         .populate({
             path: 'item',
-            populate: [{ path: 'product', select: 'name image' }, { path: 'seller', select: 'name' }],
-        })
+            populate: [{ path: 'product', select: 'name image price' }, 
+            { path: 'seller', select: 'name' },
+            { path: 'exchangeFor', select: 'name image'}]})
         .then(result => {
             res.status(200).json({
                 success: true,
@@ -110,7 +112,13 @@ exports.get_all_for_user = (req, res, next) => {
     Order.find({ user: req.userdata._id, status: 'ordered' })
         .populate({
             path: 'item',
-            populate: [{ path: 'product', select: 'name image' }, { path: 'seller', select: 'name' }],
+            populate: [{ path: 'product', select: 'name image' },
+             { path: 'seller', select: 'name' },
+            {path: 'exchangeFor', select: 'name image' }]
+
+        })
+        .populate({
+            path: 'checkout', select: 'address phone'
         })
         .then(result => {
             res.status(200).json({
@@ -130,7 +138,12 @@ exports.get_all_admin = (req, res, next) => {
     Order.find({ status: { $in: ['ordered', 'completed'] } })
         .populate({
             path: 'item',
-            populate: [{ path: 'product', select: 'name image' }, { path: 'seller', select: 'name' }]
+            populate: [{ path: 'product', select: 'name image' }, 
+            { path: 'seller', select: 'name' },
+            {path: 'exchangeFor', select: 'name image' }]
+        })
+        .populate({
+            path: 'checkout', select: 'address phone'
         })
         .then(result => success_result(res, result))
         .catch(err => error_message(res, err, "Error getting orders"))
@@ -148,11 +161,12 @@ exports.get_for_seller = (req, res, next) => {
             result.map(doc => {
                 doc.item.map(orderitem => {
                     if (String(orderitem.seller) == String(req.userdata._id)) {
-                        console.log(orderitem.seller);
+                        orderitem.status = doc.status
                         orderitems.push(orderitem)
                     }
                 })
             })
+            console.log(orderitems)
 
             res.status(200).json({
                 success: true,
@@ -172,6 +186,7 @@ exports.get_for_seller = (req, res, next) => {
 
 
 exports.update_order_item = (req, res, next) => {
+    console.log(req.body)
     OrderItem.findByIdAndUpdate(req.params.itemId, req.body)
         .then(result => {
             res.status(200).json({
@@ -188,14 +203,27 @@ exports.update_order_item = (req, res, next) => {
 }
 
 exports.delete_order_item = (req, res, next) => {
+    
     OrderItem.findByIdAndDelete(req.params.itemId)
         .then(result => {
             // console.log(result)
-            Order.findOneAndUpdate({ item: result._id }, { $pull: { item: { _id: result._id } } }, { safe: true })
+            Order.findOneAndUpdate({ item: { $in: [result._id] } }, { $pull: { item: { _id: result._id } } }, { safe: true })
                 .then(r => {
-                    res.status(200).json({
-                        message: "Order item deleted and removed successfully"
+                    Order.findOneAndUpdate({ _id: r._id }, { total_price: (r.total_price - result.price)  })
+                    .then(doc => {
+                        res.status(200).json({
+                            success: true,
+                            message: "Order item deleted and removed successfully"
+                        })
                     })
+                    .catch(err => {
+                        res.status(500).json({
+                            error: err,
+                            message: "Error in removing item form the order"
+                        })
+                    })
+
+                    
                 })
                 .catch(err => {
                     res.status(500).json({
