@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Comment = require("../models/comment")
 
-const { success_message, error_message, success_result } = require("./messages")
+const { success_message, error_message, success_result } = require("../utils/messages")
 
 exports.create = (req, res, next) => {
     let comment = new Comment({
