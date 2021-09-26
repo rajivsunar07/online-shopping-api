@@ -7,43 +7,24 @@ const User = require("../models/user")
 const Product = require("../models/product")
 const fs = require('fs')
 
+const { success_message, error_message, success_result } = require("../utils/messages")
+
+
 exports.get_all = (req, res) => {
     Product.find()
         .exec()
-        .then(result => {
-            res.status(200).json({
-                success: true,
-                result: result
-            })
-        })
-        .catch(error => {
-            res.status(500).json({
-                error: err
-            })
-        })
+        .then(result => success_result(res, result))
+        .catch(err => error_message(res, err, "Error getting products"))
 }
 
 exports.get_one = (req, res) => {
     Product.find({ _id: req.params.id })
         .exec()
         .then(result => {
-            if (result) {
-                res.status(200).json({
-                    success: true,
-                    result: result
-                })
-            } else {
-                res.status(401).json({
-                    success: false,
-                    message: "Product not found"
-                })
-            }
+            if (result) success_result(res, result)
+            else error_message(res, err, "Product not found")
         })
-        .catch(err => {
-            res.status(500).json({
-                error: err
-            })
-        })
+        .catch(err =>  error_message(res, err, "Product not found"))
 }
 
 exports.create = (req, res) => {
@@ -59,56 +40,36 @@ exports.create = (req, res) => {
 
     product
         .save()
-        .then(result => {
-            res.status(200).json({
-                success: true,
-                message: "Product created successfully",
-                createdProduct: {
-                    name: result.name,
-                    price: result.price,
-                    request: {
-                        type: "GET",
-                        url: "http://localhost:5000/products/" + result._id
-                    }
-                }
-            })
-        })
-        .catch(err => {
-            res.status(500).json({
-                error: err,
-                message: "Error in product creation"
-            })
-        })
+        .then(result => success_message(res, "Product created successfully"))
+        .catch(err => error_message(res, err,  "Error in product creation"))
 }
 
 exports.update = (req, res, next) => {
     Product.findOne({_id: req.params.id})
     .then(result => {
+        let images = []
+        images =  Array(req.body.image) 
+
         result.image.forEach(img => {
-            let images = []
-            images =  Array(req.body.image) 
-            if( images.includes(img)){
+            if(!images.includes(img)){
                 fs.unlinkSync(img)
             }
         });
-        console.log(req.files);
-
-        Product.findByIdAndUpdate(req.params.id, req.body , { $addToSet: { image: req.files.map(file => file.path) }})
-        .exec()
-        .then(result => {
-            res.status(200).json({
-                message: "Product updated"
-            });
+        
+        req.files.map(file => {
+            images.push(file.path)
         })
-        .catch(err => {
-            res.status(500).json({
-                error: err
-            });
-        });
+
+        req.body.image = images
+
+        Product.findByIdAndUpdate(req.params.id, req.body)
+        .exec()
+        .then(result => success_message(res, "Product updated"))
+        .catch(err => error_message(res, err, "Error updating product"));
         
 
     })
-    .catch()
+    .catch(err => error_message(res, err, "Product not found"))
 
     
 };
@@ -125,28 +86,13 @@ exports.delete_product = (req, res, next) => {
                 fs.unlinkSync(result.image[i])
             }
 
-            res.status(200).json({
-                message: "Product deleted"
-            });
+            success_message(res, "Product deleted successfully")
         })
-        .catch(err => {
-            res.status(500).json({
-                error: err
-            });
-        });
+        .catch(err => error_message(res, err, "Error deleting product"));
 };
 
 exports.get_for_user = (req, res, next) => {
     Product.find({ user: req.userdata._id })
-        .then(result => {
-            res.status(200).json({
-                success: true,
-                result: result
-            })
-        })
-        .catch(err => {
-            res.status(500).json({
-                error: err
-            });
-        })
+        .then(result => success_result(res, result))
+        .catch(err => error_message(res, err, "Error getting product"))
 }
