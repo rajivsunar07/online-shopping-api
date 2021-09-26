@@ -26,9 +26,6 @@ const orderItemSchema = mongoose.Schema({
         type: String,
         default: 'sell',
         enum: ['rent', 'exchange', 'sell']
-    },
-    rentedFor: {
-        type: Date
     }
 },
     {
