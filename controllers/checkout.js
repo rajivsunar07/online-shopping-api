@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 const Checkout = require("../models/checkout")
 
-const { success_message, error_message, success_result } = require("./messages")
+const { success_message, error_message, success_result } = require("../utils/messages")
+
 
 exports.create = (req, res, next) => {
     let checkout = new Checkout({
