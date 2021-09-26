@@ -7,7 +7,8 @@ const Order = require("../models/order")
 const OrderItem = require("../models/orderItem")
 const Product = require("../models/product")
 
-const { success_message, error_message, success_result } = require("./messages")
+const { success_message, error_message, success_result } = require("../utils/messages")
+
 
 exports.get_order_for_user = async (req) => {
     return await Order.find({ user: req.userdata._id, status: 'unordered' }).sort({ created_at: -1 }).limit(1).populate({
@@ -93,23 +94,13 @@ exports.get_for_user = (req, res, next) => {
             populate: [{ path: 'product', select: 'name image price' }, 
             { path: 'seller', select: 'name' },
             { path: 'exchangeFor', select: 'name image'}]})
-        .then(result => {
-            res.status(200).json({
-                success: true,
-                result: result
-            })
-        })
-        .catch(err => {
-            res.status(500).json({
-                message: "Error retreiving order",
-                error: err
-            })
-        })
+        .then(result => success_result(res, result))
+        .catch(err => error_message(res, err, "Error retreiving order"))
 }
 
 exports.get_all_for_user = (req, res, next) => {
 
-    Order.find({ user: req.userdata._id, status: 'ordered' })
+    Order.find({ user: req.userdata._id,  status: { $in: ['ordered', 'completed'] }})
         .populate({
             path: 'item',
             populate: [{ path: 'product', select: 'name image' },
@@ -120,18 +111,8 @@ exports.get_all_for_user = (req, res, next) => {
         .populate({
             path: 'checkout', select: 'address phone'
         })
-        .then(result => {
-            res.status(200).json({
-                success: true,
-                result: result
-            })
-        })
-        .catch(err => {
-            res.status(500).json({
-                message: "Error retreiving order",
-                error: err
-            })
-        })
+        .then(result => success_result(res, result))
+        .catch(err => error_message(res, err, "Error retreiving order"))
 }
 
 exports.get_all_admin = (req, res, next) => {
@@ -166,110 +147,45 @@ exports.get_for_seller = (req, res, next) => {
                     }
                 })
             })
-            console.log(orderitems)
 
-            res.status(200).json({
-                success: true,
-                result: orderitems
-            })
+            success_result(res, orderitems)
         })
-        .catch(err => {
-            res.status(500).json({
-                error: err,
-                message: "Error getting order items for seller"
-            })
-        })
-
-
+        .catch(err => error_message(res, err, "Error getting order items for seller"))
 }
-
 
 
 exports.update_order_item = (req, res, next) => {
     console.log(req.body)
     OrderItem.findByIdAndUpdate(req.params.itemId, req.body)
-        .then(result => {
-            res.status(200).json({
-                success: true,
-                message: "Order item updated successfully"
-            })
-        })
-        .catch(err => {
-            res.status(500).json({
-                error: err,
-                message: "Error in updating order item"
-            })
-        })
+        .then(result => success_message(res, "Order item updated successfully"))
+        .catch(err => error_message(res, err, "Error in updating order item"))
 }
 
 exports.delete_order_item = (req, res, next) => {
     
     OrderItem.findByIdAndDelete(req.params.itemId)
         .then(result => {
-            // console.log(result)
             Order.findOneAndUpdate({ item: { $in: [result._id] } }, { $pull: { item: { _id: result._id } } }, { safe: true })
                 .then(r => {
                     Order.findOneAndUpdate({ _id: r._id }, { total_price: (r.total_price - result.price)  })
-                    .then(doc => {
-                        res.status(200).json({
-                            success: true,
-                            message: "Order item deleted and removed successfully"
-                        })
-                    })
-                    .catch(err => {
-                        res.status(500).json({
-                            error: err,
-                            message: "Error in removing item form the order"
-                        })
-                    })
-
-                    
+                    .then(doc => success_message(res, "Order item deleted and removed successfully"))
+                    .catch(err => error_message(res, err, "Error in removing item form the order"))       
                 })
-                .catch(err => {
-                    res.status(500).json({
-                        error: err,
-                        message: "Error in removing item form the order"
-                    })
-                })
+                .catch(err => error_message(res, err, "Error in removing item form the order"))
         })
-        .catch(err => {
-            res.status(500).json({
-                error: err,
-                message: "Error in deleteing item"
-            })
-        })
+        .catch(err => error_message(res, err, "Error in deleteing item"))
 }
 
 exports.update_order = (req, res, next) => {
     Order.findByIdAndUpdate(req.params.id, req.body)
-        .then(result => {
-            res.status(200).json({
-                success: true,
-                message: "Order updated successfully"
-            })
-        })
-        .catch(err => {
-            res.status(500).json({
-                message: "Error in order update",
-                error: err
-            })
-        })
+        .then(result => success_message(res, "Order updated successfully"))
+        .catch(err => error_message(res, err, "Error in order update"))
 }
 
 exports.delete_order = (req, res, next) => {
 
     Order.deleteOne({ _id: req.params.id })
         .exec()
-        .then(result => {
-            res.status(200).json({
-                success: true,
-                message: "Order deleted successfully"
-            })
-        })
-        .catch(err => {
-            res.status(500).json({
-                message: "Error in order deletion",
-                error: err
-            })
-        })
+        .then(result => success_message(res, "Order deleted successfully"))
+        .catch(err => error_message(res, err, "Error in order deletion"))
 }
