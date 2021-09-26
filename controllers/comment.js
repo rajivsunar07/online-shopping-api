@@ -18,6 +18,8 @@ exports.create = (req, res, next) => {
 
 exports.get_all = (req, res, next) => {
     Comment.find({ product: req.params.product })
+    .populate('user', 'name image')
+    .sort({ created_at: -1})
     .exec()
     .then(result => success_result(res, result))
     .catch(err => error_message(res, err, "Error getting comment for product"))
