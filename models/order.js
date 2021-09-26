@@ -16,15 +16,15 @@ const orderSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'User'
     },
-    shipping_address: {
-        type: String,
-        default: ''
-    },
     status : {
         type: String,
         default: 'unordered',
         required: true,
         enum : ['unordered', 'ordered', 'completed']
+    },
+    checkout: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Checkout'
     }
 }, 
 {
