@@ -6,6 +6,8 @@ const fs = require('fs')
 
 const User = require("../models/user")
 
+const { success_message, error_message, success_result } = require("../utils/messages")
+
 exports.register = (req, res) => {
     // first check if the given email is already registered or not
     User.find({ email: req.body.email })
@@ -20,9 +22,7 @@ exports.register = (req, res) => {
                 // if user not found then hash the password
                 bcrypt.hash(req.body.password, 10, (err, hash) => {
                     if (err) {
-                        return res.status(500).json({
-                            error: err
-                        })
+                        return error_message(res, err, "Registration failed")
                     } else {
                         // if hashing successful create a user
                         const user = new User({
@@ -35,20 +35,8 @@ exports.register = (req, res) => {
                         // save the user
                         user
                             .save()
-                            .then(result => {
-                                // if user succesfully saved
-                                res.status(201).json({
-                                    success: true,
-                                    message: "User created succesfully"
-                                })
-                            })
-                            .catch(err => {
-                                // if an error occures
-                                console.log(err)
-                                res.status(500).json({
-                                    error: err
-                                })
-                            })
+                            .then(result => success_message(res, "User created succesfully"))
+                            .catch(err => error_message(res, err, "Registration failed"))
                     }
                 })
             }
@@ -95,7 +83,6 @@ exports.login = (req, res) => {
             })
         })
         .catch(err => {
-            console.log(err);
             res.status(500).json({
                 error: err
             })
@@ -131,25 +118,13 @@ exports.update = (req, res, next) => {
     User.findByIdAndUpdate(id, req.body)
       .exec()
       .then(result => {
+          console.log(req.file)
         User.findByIdAndUpdate(id, {image: req.file.path})
-        .then(result => {
-            res.status(200).json({
-                message: "User details updated"
-              });
-        })
-        .catch(err => {
-            res.status(500).json({
-                error: "User image update failed"
-            })
-        })
+        .then(result => success_message(res, "User details updated"))
+        .catch(err => error_message(res, err, "User image update failed"))
         
       })
-      .catch(err => {
-        res.status(500).json({
-          error: err,
-          message: "Error in user update"
-        });
-      });
+      .catch(err => error_message(res, err, "Error in user update"));
   };
 
   exports.change_password = (req, res, next) => {
@@ -188,10 +163,6 @@ exports.update = (req, res, next) => {
                     }
                 })
             }
-
-            res.status(401).json({
-                message: "Error in password update"
-            })
         })
     })
     .catch(err => {
