@@ -15,6 +15,8 @@ const orderRoute = require('./routes/order')
 const exchangeProductRoute = require('./routes/exchangeProduct')
 const commentRoute = require('./routes/comment')
 const categoryRoute = require('./routes/category')
+const checkoutRoute = require('./routes/checkout')
+
 
 
 
@@ -44,6 +46,8 @@ app.use('/order', orderRoute)
 app.use('/exchangeProduct', exchangeProductRoute)
 app.use('/comment', commentRoute)
 app.use('/category', categoryRoute)
+app.use('/checkout', checkoutRoute)
+
 
 
 
