@@ -50,6 +50,23 @@ exports.get_requests = (req, res, next) => {
 }
 
 
+exports.get_one = (req, res, next) => {
+    ExchangeProduct.findOne({ _id : req.params._id})
+    .populate('exchangeFor')
+    .then(result => {
+        res.status(200).json({
+            success: true,
+            result: result
+        })
+    })
+    .catch(err => {
+        res.status(500).json({
+            message: "Error retreiving requests",
+            error: err
+        })
+    })
+}
+
 exports.update = (req, res, next) => {
     ExchangeProduct.findByIdAndUpdate(req.params.id, {status: req.body.status})
     .then(result => {
