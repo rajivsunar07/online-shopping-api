@@ -15,8 +15,7 @@ const exchangeProductSchema = mongoose.Schema({
         required: true
     },
     image: {
-        type: [String],
-        required: true
+        type: [String]
     },
     exchangeFor: {
         type: mongoose.Schema.Types.ObjectId,
@@ -36,6 +35,6 @@ const exchangeProductSchema = mongoose.Schema({
         timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
     })
 
-const exchangeProduct = mongoose.model('exchangeProduct', exchangeProductSchema)
+const exchangeProduct = mongoose.model('ExchangeProduct', exchangeProductSchema)
 
 module.exports = exchangeProduct
