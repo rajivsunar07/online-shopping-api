@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 const ExchangeProduct = require("../models/exchangeProduct")
 
+const { success_message, error_message, success_result } = require("../utils/messages")
+
+
 exports.create = (req, res) => {
     const exchangeProduct= new ExchangeProduct({
         _id: mongoose.Types.ObjectId(),
@@ -16,75 +19,34 @@ exports.create = (req, res) => {
 
     exchangeProduct
     .save()
-    .then(result=>{
-        res.status(200).json({
-            success: true,
-            message: "Exchange product created successfully",
-            
-        })
-    })
-    .catch(err => {
-        res.status(500).json({
-            error: err,
-            message: "Error in exchange product creation"
-        })
-    })
+    .then(result=> success_message(res, "Exchange product created successfully"))
+    .catch(err => error_message(res, err, "Error in exchange product creation"))
 }
 
 exports.get_requests = (req, res, next) => {
-
     ExchangeProduct.find({ [req.params.for] : req.userdata._id})
-        .populate('exchangeFor')
+    .populate('exchangeFor')
         .then(result => {
-            res.status(200).json({
-                success: true,
-                result: result
-            })
-        })
-        .catch(err => {
-            res.status(500).json({
-                message: "Error retreiving requests",
-                error: err
-            })
-        })
+                console.log(result)
+            success_result(res, result)})
+        .catch(err => error_message(res, err, "Error retreiving requests"))
 }
 
 
 exports.get_one = (req, res, next) => {
     ExchangeProduct.findOne({ _id : req.params._id})
     .populate('exchangeFor')
-    .then(result => {
-        res.status(200).json({
-            success: true,
-            result: result
-        })
-    })
-    .catch(err => {
-        res.status(500).json({
-            message: "Error retreiving requests",
-            error: err
-        })
-    })
+    .then(result => success_result(res, result))
+    .catch(err => error_message(res, err, "Error retreiving requests"))
 }
 
 exports.update = (req, res, next) => {
     ExchangeProduct.findByIdAndUpdate(req.params.id, {status: req.body.status})
-    .then(result => {
-        res.status(200).json({
-            success: true,
-            message: "Exchange Product updated successfully"
-        })
-    })
-    .catch(err => {
-        res.status(500).json({
-            message: "Error updating Exchange Product",
-            error: err
-        })
-    })
+    .then(result => success_message(res, "Exchange Product updated successfully"))
+    .catch(err => error_message(res, "Error updating Exchange Product"))
 }
 
 exports.delete_exchangeProduct = (req, res, next) => {
-
     ExchangeProduct.findByIdAndDelete(req.params.id)
         .exec()
         .then(result => {
@@ -94,15 +56,8 @@ exports.delete_exchangeProduct = (req, res, next) => {
                 fs.unlinkSync(result.image[i])
             }
 
-            res.status(200).json({
-                message: "Exchange product deleted"
-            });
+            success_message(res, "Exchange product deleted")
         })
-        .catch(err => {
-            res.status(500).json({
-                error: err,
-
-            });
-        });
+        .catch(err => error_message(res, err, "Error deleting exchange product"));
 }
 
